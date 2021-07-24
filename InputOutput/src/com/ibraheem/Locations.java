@@ -17,13 +17,23 @@ public class Locations implements Map<Integer, Location> {
             for(Location location:locations.values()){
                 locFile.write(location.getLocationID() + "," + location.getDescription() + "\n");
             }
-            locFile.close();
+
         }catch (IOException e){
             System.out.println("In catch block");
             e.printStackTrace();
+        }finally {
+            System.out.println("In finally block");
+            try{
+                if(locFile != null){
+                    System.out.println("Attempting to close locFile");
+                    locFile.close();
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
         }
-
     }
+    
     static {
         Map<String, Integer> tempExit = new HashMap<String, Integer>();
         locations.put(0, new Location(0, "You are sitting in front of a computer learning Java",null));
