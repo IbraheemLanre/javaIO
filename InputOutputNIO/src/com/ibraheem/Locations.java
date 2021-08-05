@@ -10,7 +10,14 @@ public class Locations implements Map<Integer, Location> {
     private static Map<Integer, Location> locations = new LinkedHashMap<>();
 
     public static void main(String[] args) throws IOException {
-        Path locPath = FileSystems.getDefault().getPath("locations_big.txt");
+
+        Path locPath = FileSystems.getDefault().getPath("locations.dat");
+        try(ObjectOutputStream locaFile = new ObjectOutputStream(new BufferedOutputStream(Files.newOutputStream(locPath)))){
+            for(Location location : locations.values()){
+                locaFile.writeObject(location);
+            }
+        }
+        /*Path locPath = FileSystems.getDefault().getPath("locations_big.txt");
         Path dirPath = FileSystems.getDefault().getPath("directions_big.txt");
         try(BufferedWriter locFile = Files.newBufferedWriter(locPath); BufferedWriter dirFile = Files.newBufferedWriter(dirPath)){
             for(Location location:locations.values()){
@@ -24,23 +31,28 @@ public class Locations implements Map<Integer, Location> {
             }
         }catch (IOException e){
             System.out.println("IOException: " + e.getMessage());
-        }
+        }*/
     }
 
     static {
-        Path locPath = FileSystems.getDefault().getPath("locations_big.txt");
-        Path dirPath = FileSystems.getDefault().getPath("directions_big.txt");
-        try(Scanner scanner = new Scanner(Files.newBufferedReader((locPath)))){
-            scanner.useDelimiter(",");
-            while(scanner.hasNextLine()){
-                int loc = scanner.nextInt();
-                scanner.skip(scanner.delimiter());
-                String description = scanner.nextLine();
-                System.out.println("Imported loc: " + loc + ": " + description);
-                locations.put(loc, new Location(loc, description, null));
+
+        Path locPath = FileSystems.getDefault().getPath("locations.dat");
+        try(ObjectInputStream locFile = new ObjectInputStream(new BufferedInputStream(Files.newInputStream(locPath)))){
+            boolean eof = false;
+            while(!eof){
+                try {
+                    Location location = (Location) locFile.readObject();
+                    locations.put(location.getLocationID(), location);
+                }catch (EOFException e){
+                    eof = true;
+                }
             }
-        }catch (IOException e){
-            e.printStackTrace();
+        }catch (InvalidClassException e){
+            System.out.println("InvalidClassException " + e.getMessage());
+        }catch(IOException e){
+            System.out.println("IOException " + e.getMessage());
+        }catch (ClassNotFoundException e){
+            System.out.println("ClassNotFoundException " + e.getMessage());
         }
     }
 
